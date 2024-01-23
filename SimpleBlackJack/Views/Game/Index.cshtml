@@ -1,0 +1,201 @@
+﻿@model SimpleBlackJack.Models.GameSession
+@{
+    ViewData["Title"] = "Game";
+}
+
+<br />
+<div class="text-center">
+    <h1>Black Jack Lite</h1>
+    <hr />
+</div>
+<br />
+
+<div class="row mt-3">
+    <div class="row col-12" style="height: 200px">
+        <div class="col-6 col-md-2">
+            <div class="card bg-light align-self-center h-100 d-flex justify-content-center" style="width: 150px">
+                <div class="align-self-center">
+                    <div class="h4">Deck</div>
+                    <div class="text-center h5">
+                        @Model.Deck.Cards.Count()
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-2">
+            <div>
+                <a asp-controller="Game" asp-action="NewGame" class="btn btn-success form-control">New Game</a>
+            </div>
+            <div>
+                <a asp-controller="Game" asp-action="AnotherRound" class="btn btn-primary form-control mt-2">Another Round</a>
+            </div>
+            <div>
+                <a asp-controller="Home" asp-action="Index" class="btn btn-danger form-control mt-2">Quit</a>
+            </div>
+        </div>
+    </div>
+    <div class="row col-12 mt-3">
+        <div class="col-6 col-md-2">
+            <div>
+                @if (!Model.HasResult)
+                {
+                    <a asp-controller="Game" asp-action="DrawCard" class="btn btn-info mt-2 form-control">Draw</a>
+                }
+                else
+                {
+                    <div class="btn btn-secondary mt-2 form-control disabled">Draw</div>
+                }
+            </div>
+        </div>
+        <div class="col-6 col-md-2">
+            <div>
+                @if (!Model.HasResult)
+                {
+                    <a asp-controller="Game" asp-action="Stay" class="btn btn-warning mt-2 form-control">Stay</a>
+                }
+                else
+                {
+                    <div class="btn btn-secondary mt-2 form-control disabled">Stay</div>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="row col-12 mt-3">
+        <div class="row col-12">
+            <div class="col-2">
+                <strong>Game Status</strong>
+            </div>
+            <div class="col-5">
+                <i>
+                    @if (Model.GameStatusMessage != null)
+                    {
+                        <span class="text-success font-weight-bold">@Model.GameStatusMessage</span>
+                    }
+                    else
+                    {
+                        <span>Ongoing</span>
+                    }
+                </i>
+            </div>
+        </div>
+        <div class="row col-12">
+            <div class="col-2">
+                <strong>Round No.</strong>
+            </div>
+            <div class="col-5">
+                @Model.RoundCount
+            </div>
+        </div>
+        <div class="row col-12">
+            <div class="col-2">
+                <strong>Draw Round</strong>
+            </div>
+            <div class="col-5">
+                @Model.DrawRounds
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-5 border">
+        <div class="row">
+            <div class="col-12 text-center pt-2">
+                <h3>(You)</h3>
+            </div>
+            <div class="row col-12 m-3 p-0">
+                <div class="col-6">
+                    <span>
+                        <strong>Value:&nbsp;@(Model.Player.AlternatePoint > 0 ? $"{Model.Player.AlternatePoint} / {Model.Player.Point}" : Model.Player.Point.ToString())</strong>
+                    </span>
+                    <br />
+                    <span>
+                        <strong>Token:&nbsp;@Model.Player.Token&nbsp;&#x58D;</strong>
+                    </span>
+                </div>
+                <div class="col-6">
+                    <span>
+                        <strong>Win:&nbsp;@Model.Player.WinRounds</strong>
+                    </span>
+                    <br />
+                    <span>
+                        <strong>Lost:&nbsp;@Model.Player.LostRounds</strong>
+                    </span>
+                </div>
+            </div>
+            @foreach (var card in Model.Player.CardsAtHand)
+            {
+                <div class="col-12 col-md-6 mb-3 text-center">
+                    <img src=@($"/images/cards/{card.Value}{card.Suit}.png") style="object-fit: cover; height: 240px">
+                </div>
+            }
+        </div>
+    </div>
+    <div class="col-5 offset-1 border">
+        <div class="row">
+            <div class="col-12 text-center pt-2">
+                <h3>(Computer)</h3>
+            </div>
+            <div class="row col-12 m-3 p-0">
+                <div class="col-6">
+                    <span>
+                        <strong>Value:&nbsp;@Html.Raw(!Model.HasResult ? "&#128540;" : (Model.Computer.AlternatePoint > 0 ? $"{Model.Computer.AlternatePoint} / {Model.Computer.Point}" : Model.Computer.Point.ToString()))</strong>
+                    </span>
+                    <br />
+                    <span>
+                        <strong>Token:&nbsp;@Model.Computer.Token&nbsp;&#x58D;</strong>
+                    </span>
+                </div>
+                <div class="col-6">
+                    <span>
+                        <strong>Win:&nbsp;@Model.Computer.WinRounds</strong>
+                    </span>
+                    <br />
+                    <span>
+                        <strong>Lost:&nbsp;@Model.Computer.LostRounds</strong>
+                    </span>
+                </div>
+            </div>
+            @foreach (var card in Model.Computer.CardsAtHand)
+            {
+                <div class="col-12 col-md-6 mb-3 text-center">
+                    @if (Model.HasResult)
+                    {
+                        <img src=@($"/images/cards/{card.Value}{card.Suit}.png") style="object-fit: cover; height: 240px">
+                    }
+                    else
+                    {
+                        <img src="/images/cards/gray_back.png" style="object-fit: cover; height: 240px">
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @if (@TempData["ErrorMessage"] != null)
+    {
+        <script async>
+            toastr.options = {
+                "closeButton": true,
+                "debug": false,
+                "newestOnTop": false,
+                "progressBar": false,
+                "positionClass": "toast-bottom-full-width",
+                "preventDuplicates": true,
+                "onclick": null,
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "3000",
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            };
+
+            toastr.warning(`@TempData["ErrorMessage"]`);
+        </script>
+    }
+}
